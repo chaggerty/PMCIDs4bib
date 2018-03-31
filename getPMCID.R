@@ -1,14 +1,17 @@
-library(RefManageR)
+library("rentrez")
 
-addPMC2Bib <- function(bibfile) {
-  source('getPMCID.R')
-  bib <- ReadBib(bibfile)
-  for (idx in seq_len(length(bib))) {
+getPMCID <- function(x) {
+  if(is.null(x))  {
+    PMCID <- NA
+  } else {
+    res <- entrez_summary(db="pubmed", id=x)
+    temp <- res$articleids
+    PMCID <- temp$value[grepl("pmc", temp$idtype)][1]
     
-    bib[[idx]] <- LookupPubMedID(bib[[idx]])
-    temp <- as.data.frame(bib[[idx]])
-    temp$pmcid <- getPMCID(bib[[idx]]$pmid)
-    bib[[idx]] <- as.BibEntry(temp)
+    if (identical(PMCID, character(0))) {
+      PMCID <- NA
+    } 
   }
-  
+  return(PMCID)
 }
+
